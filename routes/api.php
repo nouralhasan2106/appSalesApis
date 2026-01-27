@@ -31,6 +31,10 @@ Route::middleware('auth:sanctum')->get('auth/me',[AuthController::class,'me']);
 Route::middleware('auth:sanctum')->post('/auth/refresh',[AuthController::class,'refresh']);
 
 
-/////////////////TENANT Management
-//api/auth/refresh api
+/////////////////TENANT Management//////////////////////////////////////////
+//api//tenant/settings get tenant settings
 Route::middleware('auth:sanctum')->get('/tenant/settings',[TenantController::class,'getSettings']);
+//api//tenant/settings update tenant settings
+Route::middleware('auth:sanctum')->post('/tenant/settings',[TenantController::class,'updateSettings']);
+//api//tenant/upload-logo upload logo
+Route::middleware('auth:sanctum')->post('/tenant/upload-logo',[TenantController::class,'uploadLogo']);
