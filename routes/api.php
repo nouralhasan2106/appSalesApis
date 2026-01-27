@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TenantController;
+use App\Http\Controllers\OrderController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -38,3 +39,14 @@ Route::middleware('auth:sanctum')->get('/tenant/settings',[TenantController::cla
 Route::middleware('auth:sanctum')->post('/tenant/settings',[TenantController::class,'updateSettings']);
 //api//tenant/upload-logo upload logo
 Route::middleware('auth:sanctum')->post('/tenant/upload-logo',[TenantController::class,'uploadLogo']);
+
+
+//////////// Order Management /////////////////////////
+// api/orders get orders
+Route::middleware('auth:sanctum')->get('/orders',[OrderController::class,'getOrders']);
+// api/orders/{id} get order by id
+Route::middleware('auth:sanctum')->get('/orders/{id}',[OrderController::class,'getOrderById']);
+// api/orders add order
+Route::middleware('auth:sanctum')->post('/orders',[OrderController::class,'addOrder']);
+// api/order/{id}  update order by id
+Route::middleware('auth:sanctum')->put('/orders/{id}',[OrderController::class,'updateOrder']);

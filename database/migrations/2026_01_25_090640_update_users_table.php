@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('role',['super_admin', 'tenant_owner', 'branch_manager', 'cashier',
                         'accountant']);
             $table->boolean('is_active')->default(true)->nullable();
-           $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');});
     }
 
