@@ -113,4 +113,21 @@ class OrderController extends Controller
             ]
         ]);
     }
+    public function deleteOrder(Request $request,$id){
+        $user=$request->user();
+        $order=Order::where('tenant_id',$user->tenant_id)->find($id);
+        if(!$order){
+            return response()->json([
+                "status"=>false,
+                "message"=>"Order not found"
+            ],404);
+        }
+        $order->orderDetails()->delete();
+        $order->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order deleted successfully'
+        ]);
+    }
 }

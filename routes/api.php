@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TenantController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderDetailsController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -20,6 +21,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+//add user API
+Route::post('/register', [AuthController::class, 'addUser']);
 //Login API
 Route::post('auth/login', [AuthController::class, 'login']);
 
@@ -48,5 +51,11 @@ Route::middleware('auth:sanctum')->get('/orders',[OrderController::class,'getOrd
 Route::middleware('auth:sanctum')->get('/orders/{id}',[OrderController::class,'getOrderById']);
 // api/orders add order
 Route::middleware('auth:sanctum')->post('/orders',[OrderController::class,'addOrder']);
+// api/orders/details add order details
+Route::middleware('auth:sanctum')->post('/orders/details',[OrderDetailsController::class,'addOrderDetails']);
+// api/orders/details get order details
+Route::middleware('auth:sanctum')->get('/order/details',[OrderDetailsController::class,'getOrderDetails']);
 // api/order/{id}  update order by id
 Route::middleware('auth:sanctum')->put('/orders/{id}',[OrderController::class,'updateOrder']);
+// api/order/{id}  delete order by id
+Route::middleware('auth:sanctum')->delete('/orders/{id}',[OrderController::class,'deleteOrder']);
