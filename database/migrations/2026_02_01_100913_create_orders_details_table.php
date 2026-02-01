@@ -22,6 +22,12 @@ return new class extends Migration
             $table->Text('notes')->nullable();
             $table->unsignedBigInteger('created_by_user_id')->nullable();
             $table->timestamps();
+
+
+            ////////////////////foreign keys
+            $table->foreign('order_id')->references('id')->on('orders');//->cascadeOnDelete();
+            $table->foreign('item_id')->references('id')->on('items');//->cascadeOnDelete();
+            $table->foreign('created_by_user_id')->references('id')->on('users')->nullOnDelete();
         });
     }
 

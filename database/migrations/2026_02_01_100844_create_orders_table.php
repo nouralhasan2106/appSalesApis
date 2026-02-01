@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
+         Schema::create('orders', function (Blueprint $table) {
             $table->bigIncrements('id');//id BIGINT PRIMARY KEY AUTO_INCREMENT,
             $table->unsignedBigInteger('tenant_id');
             $table->unsignedBigInteger('branch_id');
@@ -27,6 +27,12 @@ return new class extends Migration
             $table->Text('notes')->nullable();
             $table->unsignedBigInteger('created_by_user_id')->nullable();
             $table->timestamps();
+
+
+             ////////////////////foreign keys
+            $table->foreign('tenant_id')->references('id')->on('tenants');//->cascadeOnDelete();
+            $table->foreign('customer_id')->references('id')->on('customers')->nullOnDelete();
+            $table->foreign('created_by_user_id')->references('id')->on('users')->nullOnDelete();
         });
     }
 

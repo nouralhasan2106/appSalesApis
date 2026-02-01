@@ -21,7 +21,7 @@ class OrderController extends Controller
             'success' => false,
             'message' => 'Order not found'
         ], 404);
-    }
+        }
         return response()->json(['status'=>true,'data'=>[
             'order'=>$order
         ]]);
@@ -82,17 +82,18 @@ class OrderController extends Controller
             ],404);
         }
 
-        $data=$request->validate([
-            'branch_id'=>'nullable|exists:branches,id',
-            'shift_id' => 'nullable',
-            'customer_id' => 'nullable',
-            'order_type'=>'nullable|in:dine_in,takeaway,delivery',
-            'status'=>'nullable|in:pending,confirmed,preparing,ready,completed,cancelled',
-            'subtotal' => 'nullable|numeric|min:0',
-            'tax_amount' => 'nullable|numeric|min:0',
-            'discount_amount' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string',
+            $data = $request->validate([
+            'branch_id'=>'sometimes|nullable|exists:branches,id',
+            'shift_id' => 'sometimes|nullable',
+            'customer_id' => 'sometimes|nullable',
+            'order_type'=>'sometimes|nullable|in:dine_in,takeaway,delivery',
+            'status'=>'sometimes|nullable|in:pending,confirmed,preparing,ready,completed,cancelled',
+            'subtotal' => 'sometimes|nullable|numeric|min:0',
+            'tax_amount' => 'sometimes|nullable|numeric|min:0',
+            'discount_amount' => 'sometimes|nullable|numeric|min:0',
+            'notes' => 'sometimes|nullable|string',
         ]);
+
 
 
         if(isset($data['subtotal'])|| isset($data['tax_amount'])||isset($data['discount_amount'])){

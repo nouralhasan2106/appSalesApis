@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TenantController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderDetailsController;
+use App\Http\Controllers\CustomerController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -44,7 +45,7 @@ Route::middleware('auth:sanctum')->post('/tenant/settings',[TenantController::cl
 Route::middleware('auth:sanctum')->post('/tenant/upload-logo',[TenantController::class,'uploadLogo']);
 
 
-//////////// Order Management /////////////////////////
+//////////////////////// Order Management /////////////////////////
 // api/orders get orders
 Route::middleware('auth:sanctum')->get('/orders',[OrderController::class,'getOrders']);
 // api/orders/{id} get order by id
@@ -59,3 +60,16 @@ Route::middleware('auth:sanctum')->get('/order/details',[OrderDetailsController:
 Route::middleware('auth:sanctum')->put('/orders/{id}',[OrderController::class,'updateOrder']);
 // api/order/{id}  delete order by id
 Route::middleware('auth:sanctum')->delete('/orders/{id}',[OrderController::class,'deleteOrder']);
+
+
+///////////////////////// Customers Managment//////////////////////////////////////////////////////////////////
+// api/customers get customers
+Route::middleware('auth:sanctum')->get('/customers',[CustomerController::class,'getCustomers']);
+// api/customers add new customer
+Route::middleware('auth:sanctum')->post('/customers',[CustomerController::class,'addCustomer']);
+// api/customers/{id}  get customer by id
+Route::middleware('auth:sanctum')->get('/customers/{id}',[CustomerController::class,'getCustomerById']);
+// api/customers/{id}  update customer by id
+Route::middleware('auth:sanctum')->put('/customers/{id}',[CustomerController::class,'updateCustomer']);
+// api/customers/{id}  delete customer by id
+Route::middleware('auth:sanctum')->delete('/customers/{id}',[CustomerController::class,'deleteCustomer']);
