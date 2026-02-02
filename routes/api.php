@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TenantController;
+use App\Http\Controllers\BranchController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderDetailsController;
 use App\Http\Controllers\CustomerController;
@@ -23,13 +24,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 //add user API
-Route::post('/register', [AuthController::class, 'addUser']);
+Route::post('auth/register', [AuthController::class, 'addUser']);
 //Login API
 Route::post('auth/login', [AuthController::class, 'login']);
 
 //Logout API  //'auth:sanctum'--->علشان محدش يقدر يعمل logout بدون token
 //هذا Middleware بيتأكد إن الطلب فيه Token صحيح.
-Route::middleware('auth:sanctum')->post('/logout',[AuthController::class, 'logout']);
+Route::middleware('auth:sanctum')->post('/auth/logout',[AuthController::class, 'logout']);
 //api/auth/me api
 Route::middleware('auth:sanctum')->get('auth/me',[AuthController::class,'me']);
 //api/auth/refresh api
@@ -37,11 +38,24 @@ Route::middleware('auth:sanctum')->post('/auth/refresh',[AuthController::class,'
 
 
 /////////////////TENANT Management//////////////////////////////////////////
-//api//tenant/settings get tenant settings
+// api/tenant add new tenant
+Route::middleware('auth:sanctum')->post('/tenant',[TenantController::class,'addTenant']);
+//api/tenant/settings get tenant settings
 Route::middleware('auth:sanctum')->get('/tenant/settings',[TenantController::class,'getSettings']);
-//api//tenant/settings update tenant settings
+//api/tenant/settings update tenant settings
 Route::middleware('auth:sanctum')->post('/tenant/settings',[TenantController::class,'updateSettings']);
-//api//tenant/upload-logo upload logo
+//api/tenant/upload-logo upload logo
+Route::middleware('auth:sanctum')->post('/tenant/upload-logo',[TenantController::class,'uploadLogo']);
+
+
+/////////////////Branch Management//////////////////////////////////////////
+// api/tenant/branch add new branch
+Route::middleware('auth:sanctum')->post('/tenant/branches',[BranchController::class,'addBranch']);
+//api/tenant/settings get tenant settings
+Route::middleware('auth:sanctum')->get('/tenant/settings',[TenantController::class,'getSettings']);
+//api/tenant/settings update tenant settings
+Route::middleware('auth:sanctum')->post('/tenant/settings',[TenantController::class,'updateSettings']);
+//api/tenant/upload-logo upload logo
 Route::middleware('auth:sanctum')->post('/tenant/upload-logo',[TenantController::class,'uploadLogo']);
 
 

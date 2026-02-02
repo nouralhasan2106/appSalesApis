@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Branch;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
@@ -16,9 +17,18 @@ class AuthController extends Controller
         "name"=>'required|string|max:255',
         "email"=>'required|email|unique:users,email',
         "password"=>'required|min:6',
-        "role"=>['required',Rule::in([ 'super_admin','tenant_owner','branch_manager','cashier','accountant'])]
+        "role"=>['required',Rule::in([ 'super_admin','tenant_owner','branch_manager','cashier','accountant']),],
+         'is_active' => 'boolean'
      ]);
-
+    //check if branch belongs to tenant
+    if(!empty($data['branch_id'])){
+        $branch=Branch::where('id',$data['branch_id'])->where('tenant_id',$data['tenant_id'])->first();
+        if (!$branch) {
+            throw ValidationException::withMessages([
+                'branch_id' => 'This branch does not belong to the selected tenant.'
+            ]);
+        }
+    }
      $user=User::create([
         'tenant_id'=>$data['tenant_id'],
         'branch_id'=>$data['branch_id']??null,

@@ -8,6 +8,29 @@ use Illuminate\Support\Facades\Storage;
 
 class TenantController extends Controller
 {
+    public function addTenant(Request $request){
+      
+        $data=$request->validate([
+            'name'=>'required|string|max:255',
+            'email' => 'nullable|email|unique:tenants,email',
+            'phone' => 'nullable|string|max:50',
+            'address'=>'nullable|string',
+            'logo' => 'nullable|string|max:255',
+            'currency' => 'nullable|string|size:3',
+            'tax_rate' => 'nullable|numeric|min:0'
+        ]);
+
+        
+        $tenant=Tenant::create($data);
+
+         return response()->json([
+            'success' => true,
+            'message' => 'Tenant created successfully',
+            'data' => [
+                'tenant' => $tenant
+            ]
+        ], 201);
+    }
     //
     public function getSettings(Request $request){
         $user=$request->user();
