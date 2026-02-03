@@ -4,6 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Models\Branch;
+use App\Models\OrdersDetails;
+use App\Models\Tenant;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+
 class OrderController extends Controller
 {
     public function getOrders(Request $request){
@@ -27,12 +33,100 @@ class OrderController extends Controller
         ]]);
     }
      public function addOrder(Request $request){
-        $user=$request->user();
 
+        $user=$request->user();
+        
         $data=$request->validate([
-            'branch_id'=>'required|exists:branches,id',
-             'shift_id' => 'nullable',
-             'customer_id' => 'nullable',
+            'branch_id'=>['required',Rule::exists('branches','id')->where(function($query) use ($user){
+                $query->where('tenant_id',$user->tenant_id);
+            })], //'required|exists:branches,id',
+            'shift_id' => 'nullable',
+            'customer_id' =>['nullable',Rule::exists('customers','id')->where(function($query) use($user){
+                $query->where('tenant_id',$user->tenant_id);
+            })] ,//'nullable',
+            'order_type'=>'required|in:dine_in,takeaway,delivery',
+            'items'=>'required|array|min:1',
+            'items.*.item_id'=>['required',Rule::exists('items','id')->where(function($query) use($user){
+                $query->where('tenant_id',$user->tenant_id);
+            })],
+            'items.*.item_variant_id'=>'nullable',//'nullable|exists:item_variants,id',//نشوف الاول لو موجود جدول اسمه item_variants
+            'items.*.quantity'=>'required|integer|min:1',
+            'items.*.unit_price'=>'required|numeric|min:0',//نتأكد الاول انه بيتبعت في الريكويست
+            'items.*.notes'=>'nullable|string',
+           // 'status'=>'required|in:pending,confirmed,preparing,ready,completed,cancelled',
+           // 'subtotal' => 'required|numeric|min:0',
+           // 'tax_amount' => 'required|numeric|min:0',
+            'discount_amount' => 'nullable|numeric|min:0',
+            'notes' => 'nullable|string',
+        ]);
+
+        return DB::transaction(function() use($data,$user){
+            $subtotal = 0;
+            $orderDetails = [];
+            foreach ($data['items'] as $item) {
+               $total1=$item['unit_price']*$item['quantity'];
+               $subtotal +=$total1;
+               $orderDetails[]=[
+                'item_id'=>$item['item_id'],
+                'item_variant_id'=>$item['item_variant_id'] ?? null,
+                'quantity'=>$item['quantity'],
+                'unit_price'=>$item['unit_price'], // السعر جاي من request
+                'total_price'=>$total1,
+                'notes'=>$item['notes'],
+                'created_at'=>now(),
+                'updated_at'=>now(),
+               ];
+            }
+            //get tax_rate
+            $tenant=Tenant::find($user->tenant_id);
+            $tax_amount=$subtotal * ($tenant->tax_rate / 100);
+            $discount = $data['discount_amount'] ?? 0;
+            $total = $subtotal + $tax_amount - $discount;
+
+            //create Order
+             $order=Order::create([
+            'tenant_id'=>$user->tenant_id,
+            'branch_id' => $data['branch_id'],
+            'shift_id' => $data['shift_id'] ?? null,
+            'customer_id' => $data['customer_id'] ?? null,
+            'order_type' => $data['order_type'],
+            'status' => Order::STATUS_PENDING,
+            'subtotal' => $subtotal,
+            'tax_amount' => $tax_amount,
+          //  'discount_amount' => $discount,
+            'total_amount' => $total,
+            'paid_amount' => 0,
+            'notes' => $data['notes'] ?? null,
+            'created_by_user_id' => $user->id,
+            ]);
+
+            foreach ($orderDetails as &$detail) {
+                $detail['order_id']=$order->id;
+            }
+            OrdersDetails::insert($orderDetails);
+            return response()->json([
+                'success'=>true,
+                'message'=>'Order created successfully',
+                'data'=>[
+                    'order'=>$order
+                ]
+            ],201);
+
+        });
+
+    }
+     public function addOrder1(Request $request){
+
+        $user=$request->user();
+        
+        $data=$request->validate([
+            'branch_id'=>['required',Rule::exists('branches','id')->where(function($query) use ($user){
+                $query->where('tenant_id',$user->tenant_id);
+            })], //'required|exists:branches,id',
+            'shift_id' => 'nullable',
+            'customer_id' =>['nullable',Rule::exists('customers','id')->where(function($query) use($user){
+                $query->where('tenant_id',$user->tenant_id);
+            })] ,//'nullable',
             'order_type'=>'required|in:dine_in,takeaway,delivery',
            // 'status'=>'required|in:pending,confirmed,preparing,ready,completed,cancelled',
             'subtotal' => 'required|numeric|min:0',
@@ -40,7 +134,24 @@ class OrderController extends Controller
             'discount_amount' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string',
         ]);
-
+       /* //check if branch belongs to tenant
+            if(!empty($data['branch_id'])){
+                $branch=Branch::where('id',$data['branch_id'])->where('tenant_id',$user->tenant_id)->first();
+                if (!$branch) {
+                    throw ValidationException::withMessages([
+                        'branch_id' => 'This branch does not belong to the selected tenant.'
+                    ]);
+                }
+            }
+        //check if customer belongs to tenant
+            if(!empty($data['customer_id'])){
+                $branch=Customer::where('id',$data['customer_id'])->where('tenant_id',$user->tenant_id)->first();
+                if (!$branch) {
+                    throw ValidationException::withMessages([
+                        'customer_id' => 'This customer does not belong to the selected tenant.'
+                    ]);
+                }
+            }*/
         $taxAmount=$data['tax_amount']??0;
         $discountAmount=$data['discount_amount']??0;
 
