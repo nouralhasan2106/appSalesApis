@@ -319,15 +319,19 @@ class OrderController extends Controller
     }
     public function deleteOrder(Request $request,$id){
         $user=$request->user();
-        $order=Order::where('tenant_id',$user->tenant_id)->find($id);
-        if(!$order){
-            return response()->json([
-                "status"=>false,
-                "message"=>"Order not found"
-            ],404);
-        }
-        $order->orderDetails()->delete();
-        $order->delete();
+        $order=Order::where('tenant_id',$user->tenant_id)->findOrFail($id);
+       //prevent deleting completed orders
+       if(in_array($order->status,[Order::STATUS_COMPLETED])){
+        return response()->json(['status' => false,
+            'message' => 'Completed orders cannot be deleted'
+             ], 422);
+       }
+
+       DB::transaction(function() use($order){
+             $order->orderDetails()->delete();
+             $order->delete();
+       });
+       
 
         return response()->json([
             'success' => true,
